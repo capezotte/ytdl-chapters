@@ -1,0 +1,2 @@
+#!/usr/bin/jq -rf
+.chapters[] | .title, .start_time, .end_time

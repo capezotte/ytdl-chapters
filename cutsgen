@@ -1,0 +1,62 @@
+#!/usr/bin/awk -f
+BEGIN {
+	time_pat = "[0-9]+(:[0-5]?[0-9])+" # Pattern to match a timestamp
+	nn = "[-:[:space:]\\[\\]]+" # Whitespace and co
+	FS="[^:0-9]" # Get fields to be only 0:00
+}
+
+{
+	# Try to find the first timestamp.
+	t1 = ""; t2 = ""
+	for (i=1;i<=NF;i++) {
+		if (match($i,time_pat)) {
+			t1 = substr($i,RSTART,RLENGTH)
+			break
+		}
+	}
+	if (!t1) next # Not even one match.
+	
+	# Check for matches in previous lines.
+	if (t_mem) {
+		print name_mem
+		print t_mem
+		print t1 # This cut ends the previous one.
+		t_mem=""
+		name_mem=""
+	}
+	
+	# Try to find the second timestamp.
+	for (i++;i<=NF;i++) {
+		if (match($i,time_pat)) {
+			t2 = substr($i,RSTART,RLENGTH)
+			break
+		}
+	}
+	
+	# Extract video title.
+	gsub(time_pat,"") # Remove any other timestamps
+	sub("^" nn,"") # Remove beginning whitespace and co.
+	sub(nn "$","") # Remove trailing
+
+	if (t2) {
+		# Found two timestamps per line!
+		print $0
+		print t1
+		print t2
+	} else {
+		# Oh noes, one timestamp per line!
+		# Memorize name.
+		name_mem = $0
+		# Memorize this timestamp.
+		t_mem = t1
+	}
+}
+
+END {
+	if (name_mem) {
+		# Pesky one timestamps per line.
+		print name_mem
+		print t_mem
+		print ""
+	}
+}

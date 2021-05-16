@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+VFILE=${1:?No video input.}
+EXT=${VFILE##*.}
+while read -r TITLE; read -r START; read -r END; do
+	echo "Cutting $TITLE from $VFILE ${START:+(begin: $START) }${END:+(end: $END)}"
+	ffmpeg -nostdin \
+	-loglevel 8 \
+	-i "$VFILE" \
+	-c copy \
+	${START:+-ss "$START"} \
+	${END:+-to "$END"} \
+	-- "${TITLE}.${EXT}"
+done

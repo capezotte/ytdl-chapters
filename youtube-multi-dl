@@ -1,0 +1,2 @@
+#!/bin/sh
+exec youtube-dl --write-info-json --exec 'set -x; V={} ; { cutsgen CUTS || jsoncutsgen "${V%.*}".info.json ; } | cutsproc "$V"' "$@"
